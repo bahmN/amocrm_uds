@@ -6,15 +6,19 @@
         "version": "1.0.1",
         "interface_version": 2,
         "init_once": false,
-        "locale": ["ru"],
-        "installation": true, 
-        "support":{
+        "locale": [
+            "ru"
+        ],
+        "installation": true,
+        "support": {
             "link": "https://www.fl.ru/users/iwanaev/portfolio",
             "email": "iwanaev23@gmail.com"
         }
     },
-    "locations": ["lcard-1"],
-    "tour":{
+    "locations": [
+        "lcard-1"
+    ],
+    "tour": {
         "is_tour": true,
         "tour_images": {
             "ru": [
@@ -28,6 +32,11 @@
             "name": "settings.url",
             "type": "text",
             "required": true
-        } 
+        },
+        "min_sum_lead": {
+            "name": "settings.min_sum_lead",
+            "type": "text",
+            "required": true
+        }
     }
 }

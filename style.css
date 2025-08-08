@@ -79,6 +79,17 @@ h1 {
 
 .au-result {
     display: none;
-    font-size: 18px;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.au_container__success-discard {
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.au-success { 
+    font-size: 16px;
     font-weight: 400;
 }
