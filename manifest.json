@@ -24,15 +24,10 @@
         "tour_description": "tour.description"
     },
     "settings": {
-        "client_id": {
-            "name": "settings.client_id",
+        "url": {
+            "name": "settings.url",
             "type": "text",
             "required": true
-        },
-        "api_key": {
-            "name": "settings.api_key",
-            "type": "pass",
-            "required": true
-        }
+        } 
     }
 }

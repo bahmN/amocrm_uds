@@ -1,9 +1,14 @@
 <div class="au_body">
 	<h1>amoCRM x UDS</h1>
-	<input type="number" name="uds_code" placeholder="123456" max="6" required>
-	<button class="au_form__button">Проверить</button>
-	{% if points is defined %}
-		<div class="au_form-result">Баллов:
-			{{ points }}</div>
-	{% endif %}
+	<div class="au_container__check">
+		<input class="au_input__numb" type="text" name="uds_code" placeholder="123456" maxlength="6" pattern="\d{6}" required>
+		<div class="au-result"></div>
+		<button class="au_button__check">Проверить</button>
+	</div>
+
+	<div class="au_container__choice">
+		<div class="au-result"></div>
+		<button class="au_button__discard">Списать</button>
+		<button class="au_button__reward">Копить</button>
+	</div>
 </div>

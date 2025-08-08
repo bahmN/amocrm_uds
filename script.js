@@ -2,16 +2,41 @@ define(["jquery"], function ($) {
     var CustomWidget = function () {
         var self = this;
 
-        this.checkUdsBonus = function () {
-            self.crm_post(
-                'https://xn--b1ag1aakjpl.xn--p1ai/uds/check',
-                {
-                },
-                function (msg) {
-                    console.log(msg)
+        this.checkUdsBonus = function (settings) {
+            $('.au-result').css('display', 'flex');
+            var udsCode = $('input[name="uds_code"]').val();
+            $.get(
+                'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id'),
+                '',
+                function (lead) {
+                    var price = lead.price;
+                    self.crm_post(
+                        settings.url + '/check',
+                        {
+                            code: udsCode,
+                            total: price,
+                        },
+                        function (res) {
+                            if (res?.purchase?.points !== undefined && res?.purchase?.points !== null) {
+                                $('.au-result').html('Доступно к списанию: <b>' + res.purchase.points + '</b> баллов');
+                                $('.au_container__check').css('display', 'none');
+                                $('.au_container__choice').css('display', 'flex');
+                            } else {
+                                const errorMessage = res?.message || 'Неизвестная ошибка';
+                                $('.au-result').text('Ошибка: ' + errorMessage);
+                            }
+                        },
+                        'json'
+                    );
                 },
                 'json'
             );
+        }
+
+        this.rewardUdsBonus = function () {
+            self.crm_post = function () {
+
+            }
         }
 
         this.callbacks = {
@@ -21,9 +46,22 @@ define(["jquery"], function ($) {
                 return true;
             },
             bind_actions: function () {
+                const settings = self.get_settings();
                 if (self.system().area == 'lcard') {
-                    $('.au_form__button').on('click', function () {
-                        self.checkUdsBonus();
+                    const observer = new MutationObserver((mutations, obs) => {
+                        const checkButton = document.querySelector('.au_button__check');
+                        if (checkButton) {
+                            $(checkButton).on('click', () => self.checkUdsBonus(settings));
+                            obs.disconnect();
+                        }
+
+                        console.log('Элемент не найден');
+
+                    });
+
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true
                     });
                 }
 
@@ -36,7 +74,7 @@ define(["jquery"], function ($) {
                     var markup = template.render(params);
                     self.render_template({
                         caption: {
-                            class_name: 'js-ac-caption',
+                            class_name: 'js-au',
                             html: ''
                         },
                         body: '',
@@ -47,16 +85,16 @@ define(["jquery"], function ($) {
                 self.render({
                     href: '/templates/template.twig',
                     base_path: self.params.path,
-                    load: callback 
+                    load: callback
                 },
                     params
                 );
+
                 return true;
             },
-            dpSettings: function () { },
-            advancedSettings: function () { },
-            destroy: function () { },
-            onSave: function () { },
+            advancedSettings: function () { return true },
+            destroy: function () { return true },
+            onSave: function () { return true },
         };
         return this;
     };
