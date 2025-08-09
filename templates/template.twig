@@ -1,19 +1,21 @@
 <div class="au_body">
 	<h1>amoCRM x UDS</h1>
-	<div class="au_container__check">
-		<input class="au_input__numb" type="text" name="uds_code" placeholder="123456" maxlength="6" pattern="\d{6}" required>
-		<div class="au-result"></div>
-		<button class="au_button__check">Проверить</button>
-	</div>
+	{% if not hasDiscount %}
+		<div class="au_container__check">
+			<input class="au_input__numb" type="text" name="uds_code" placeholder="Код из UDS" maxlength="6" pattern="\d{6}" required>
+			<div class="au-result"></div>
+			<button class="au_button__check">Проверить</button>
+		</div>
 
-	<div class="au_container__choice">
-		<div class="au-result"></div>
-		<button class="au_button__discard">Списать</button>
-		<button class="au_button__reward">Копить</button>
-	</div>
-
-	<div class="au_container__success-discard">
-		<div class="au-success">Бонусы списаны. Сумма заказа изменена, скидка включена в сделку.</div>
-		{# <button class="au_button__reward">Отменить списание</button> #}
-	</div>
+		<div class="au_container__choice">
+			<div class="au-result"></div>
+			<button class="au_button__discard">Списать</button>
+			{# <button class="au_button__reward">Копить</button> #}
+		</div>
+	{% else %}
+		<div class="au_container__success-discard">
+			<div class="au-success">Бонусы списаны. Сумма заказа изменена, скидка включена в сделку.</div>
+			{# <button class="au_button__reward">Отменить списание</button> #}
+		</div>
+	{% endif %}
 </div>

@@ -19,15 +19,19 @@ define(["jquery"], function ($) {
                             },
                             function (res) {
                                 if (res?.purchase?.points !== undefined && res?.purchase?.points !== null) {
-                                    $('.au-result').text('Доступно к списанию: ' + res.purchase.points + ' баллов');
+                                    let integerPoints = Math.floor(res.purchase.points) 
+                                    $('.au-result').text('Доступно к списанию: ' + integerPoints + ' баллов');
                                     $('.au_container__check').css('display', 'none');
                                     $('.au_container__choice').css('display', 'flex');
 
                                     $('.au_button__discard').on('click', function () {
-                                        self.discardUdsBonus(settings, udsCode, price, res.purchase.points);
+                                        self.discardUdsBonus(settings, udsCode, price, integerPoints);
                                     });
                                 } else {
-                                    const errorMessage = res?.message || 'Неизвестная ошибка';
+                                    var errorMessage = res?.message || 'Неизвестная ошибка';
+                                    if(errorMessage === 'The page you requested is not found.'){
+                                        errorMessage = 'Пользователь с данным кодом на оплату не найден';
+                                    }
                                     $('.au-result').text('Ошибка: ' + errorMessage);
                                 }
                             },
@@ -49,7 +53,6 @@ define(["jquery"], function ($) {
                     total: total,
                 },
                 function (res) {
-                    console.log(res)
                     var newPrice = total - points;
                     $.ajax({
                         url: 'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id'),
@@ -69,8 +72,7 @@ define(["jquery"], function ($) {
                             ]
                         }),
                         success: function (res) {
-                            $('.au_container__choice').css('display', 'none');
-                            $('.au_container__success-discard').css('display', 'flex');
+                            location.reload();
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
                             console.log("Ошибка при обновлении сделки:", textStatus, errorThrown);
@@ -81,7 +83,7 @@ define(["jquery"], function ($) {
             );
         }
 
-        this.rewardUdsBonus = function () {
+        this.rewardUdsBonus = function (settings, udsCode, total) {
             self.crm_post = function () {
 
             }
@@ -113,26 +115,45 @@ define(["jquery"], function ($) {
                 return true;
             },
             render: function () {
-                var params = {};
+                $.get(
+                    'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id'),
+                    '',
+                    function (lead) {
+                        let hasDiscount = false;
 
-                var callback = function (template) {
-                    var markup = template.render(params);
-                    self.render_template({
-                        caption: {
-                            class_name: 'js-au',
-                            html: ''
+                        if (lead.custom_fields_values) {
+                            const discountField = lead.custom_fields_values.find(field => field.field_name === "Скидка" || field.field_id === 509021);
+
+                            if (discountField && discountField.values && discountField.values.length > 0) {
+                                hasDiscount = true;
+                            }
+                        }
+
+                        var params = {
+                            hasDiscount: hasDiscount
+                        };
+
+                        var callback = function (template) {
+                            var markup = template.render(params);
+                            self.render_template({
+                                caption: {
+                                    class_name: 'js-au',
+                                    html: ''
+                                },
+                                body: '',
+                                render: markup,
+                            });
+                        };
+
+                        self.render({
+                            href: '/templates/template.twig',
+                            base_path: self.params.path,
+                            load: callback
                         },
-                        body: '',
-                        render: markup,
-                    });
-                };
-
-                self.render({
-                    href: '/templates/template.twig',
-                    base_path: self.params.path,
-                    load: callback
-                },
-                    params
+                            params
+                        );
+                    },
+                    'json'
                 );
 
                 return true;

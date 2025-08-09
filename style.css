@@ -84,7 +84,7 @@ h1 {
 }
 
 .au_container__success-discard {
-    display: none;
+    display: flex;
     flex-direction: column;
     gap: 15px;
 }
