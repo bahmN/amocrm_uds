@@ -10,12 +10,18 @@
 		<div class="au_container__choice">
 			<div class="au-result"></div>
 			<button class="au_button__discard">Списать</button>
-			{# <button class="au_button__reward">Копить</button> #}
+			<button class="au_button__reward">Копить</button>
 		</div>
-	{% else %}
+	{% elseif hasDiscount %}
 		<div class="au_container__success-discard">
-			<div class="au-success">Бонусы списаны. Сумма заказа изменена, скидка включена в сделку.</div>
+			<div class="au-success">Бонусы UDS списаны.</div>
+			{# <button class="au_button__reward">Отменить списание</button> #}
+		</div>
+	{% elseif hasReward %}
+		<div class="au_container__success-discard">
+			<div class="au-success">Бонусы UDS начислены.</div>
 			{# <button class="au_button__reward">Отменить списание</button> #}
 		</div>
 	{% endif %}
+
 </div>

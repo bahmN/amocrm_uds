@@ -18,15 +18,25 @@ define(["jquery"], function ($) {
                                 total: price,
                             },
                             function (res) {
-                                if (res?.purchase?.points !== undefined && res?.purchase?.points !== null) {
-                                    let integerPoints = Math.floor(res.purchase.points)
+                                if ((res?.purchase?.points !== undefined && res?.purchase?.points !== null) ||
+                                    (res?.purchase?.certificatePoints !== undefined && res?.purchase?.certificatePoints !== null)
+                                ) {
+                                    let integerPoints = Math.floor(res.purchase.points || res.purchase.certificatePoints || 0);
+
                                     $('.au-result').text('Доступно к списанию: ' + integerPoints + ' баллов');
                                     $('.au_container__check').css('display', 'none');
                                     $('.au_container__choice').css('display', 'flex');
-
-                                    $('.au_button__discard').on('click', function () {
-                                        self.discardUdsBonus(settings, udsCode, price, integerPoints);
+                                    $('.au_button__reward').on('click', function () {
+                                        self.rewardUdsBonus(settings, udsCode, price);
                                     });
+
+                                    if (integerPoints > 0) {
+                                        $('.au_button__discard').on('click', function () {
+                                            self.discardUdsBonus(settings, udsCode, price, integerPoints);
+                                        });
+                                    } else {
+                                        $('.au_button__discard').css('display', 'none');
+                                    }
                                 } else {
                                     var errorMessage = res?.message || 'Неизвестная ошибка';
                                     if (errorMessage === 'The page you requested is not found.') {
@@ -52,37 +62,70 @@ define(["jquery"], function ($) {
                     code: udsCode,
                     total: total,
                 },
-                function (res) { 
-                    $.ajax({
-                        url: 'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id') + '/notes',
-                        method: 'post',
-                        dataType: 'json',
-                        data: JSON.stringify({
-                            'note_type': {
-                                "note_type": 'common'
+                function (res) {
+                    if (res.state === 'NORMAL') {
+                        $.ajax({
+                            url: 'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id') + '/notes',
+                            method: 'post',
+                            dataType: 'json',
+                            data: JSON.stringify({
+                                'note_type': {
+                                    "note_type": 'common'
+                                },
+                                'params': {
+                                    "note_type": 'common',
+                                    "text": '⚠️Списаны баллы UDS, в размере: ' + points + ' баллов.'
+                                }
+                            }),
+                            success: function (res) {
+                                location.reload();
                             },
-                            'params':  {
-                                "note_type": 'common',
-                                "text": '‼️если заказ по акции, не забудьте поставить тег \"Акция\"'
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                console.log("Ошибка при обновлении сделки:", textStatus, errorThrown);
                             }
-                        }),
-                        success: function (res) {
-                            alert('Списано ' + points + ' бонусов')
-                            location.reload();
-                        },
-                        error: function (jqXHR, textStatus, errorThrown) {
-                            console.log("Ошибка при обновлении сделки:", textStatus, errorThrown);
-                        }
-                    });
+                        });
+                    } else {
+                        alert('Баллы не были списаны. Причина: ' + res);
+                    }
                 },
                 'json'
             );
         }
 
         this.rewardUdsBonus = function (settings, udsCode, total) {
-            self.crm_post = function () {
+            self.crm_post(
+                settings.url + '/reward',
+                {
+                    code: udsCode,
+                    total: total
+                },
+                function (res) {
+                    res = JSON.parse(res);
+                    if (res["0"].accepted === 1 && res.points_rewarded) {
+                        $.ajax({
+                            url: 'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id') + '/notes',
+                            method: 'post',
+                            dataType: 'json',
+                            data: JSON.stringify({
+                                'note_type': {
+                                    "note_type": 'common'
+                                },
+                                'params': {
+                                    "note_type": 'common',
+                                    "text": '✅Клиенту начислены UDS баллы в размере: ' + res.points_rewarded + ' баллов.'
+                                }
+                            }),
+                            success: function (res) {
+                                location.reload();
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                console.log("Ошибка при обновлении сделки:", textStatus, errorThrown);
+                            }
+                        });
+                    }
+                }
+            );
 
-            }
         }
 
         this.callbacks = {
