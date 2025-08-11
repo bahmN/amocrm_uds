@@ -19,7 +19,7 @@ define(["jquery"], function ($) {
                             },
                             function (res) {
                                 if (res?.purchase?.points !== undefined && res?.purchase?.points !== null) {
-                                    let integerPoints = Math.floor(res.purchase.points) 
+                                    let integerPoints = Math.floor(res.purchase.points)
                                     $('.au-result').text('Доступно к списанию: ' + integerPoints + ' баллов');
                                     $('.au_container__check').css('display', 'none');
                                     $('.au_container__choice').css('display', 'flex');
@@ -29,7 +29,7 @@ define(["jquery"], function ($) {
                                     });
                                 } else {
                                     var errorMessage = res?.message || 'Неизвестная ошибка';
-                                    if(errorMessage === 'The page you requested is not found.'){
+                                    if (errorMessage === 'The page you requested is not found.') {
                                         errorMessage = 'Пользователь с данным кодом на оплату не найден';
                                     }
                                     $('.au-result').text('Ошибка: ' + errorMessage);
@@ -52,26 +52,22 @@ define(["jquery"], function ($) {
                     code: udsCode,
                     total: total,
                 },
-                function (res) {
-                    var newPrice = total - points;
+                function (res) { 
                     $.ajax({
-                        url: 'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id'),
-                        method: 'patch',
+                        url: 'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id') + '/notes',
+                        method: 'post',
                         dataType: 'json',
                         data: JSON.stringify({
-                            'price': newPrice,
-                            'custom_fields_values': [
-                                {
-                                    'field_id': 509021,
-                                    'values': [
-                                        {
-                                            'value': points
-                                        }
-                                    ]
-                                }
-                            ]
+                            'note_type': {
+                                "note_type": 'common'
+                            },
+                            'params':  {
+                                "note_type": 'common',
+                                "text": '‼️если заказ по акции, не забудьте поставить тег \"Акция\"'
+                            }
                         }),
                         success: function (res) {
+                            alert('Списано ' + points + ' бонусов')
                             location.reload();
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
@@ -122,9 +118,11 @@ define(["jquery"], function ($) {
                         let hasDiscount = false;
 
                         if (lead.custom_fields_values) {
-                            const discountField = lead.custom_fields_values.find(field => field.field_name === "Скидка" || field.field_id === 509021);
+                            const discountField = lead.custom_fields_values.find(field =>
+                                field.field_name === "Скидка" || field.field_id === 509021
+                            );
 
-                            if (discountField && discountField.values && discountField.values.length > 0) {
+                            if (discountField?.values?.[0]?.value && parseFloat(discountField.values[0].value) > 0) {
                                 hasDiscount = true;
                             }
                         }
