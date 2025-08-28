@@ -1,16 +1,26 @@
 define(["jquery"], function ($) {
-    var CustomWidget = function () {
-        var self = this;
+    const CustomWidget = function () {
+        const self = this;
 
         this.checkUdsBonus = function (settings) {
             $('.au-result').css('display', 'flex');
-            var udsCode = $('input[name="uds_code"]').val();
             $.get(
                 'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id'),
                 '',
                 function (lead) {
-                    var price = lead.price;
-                    if (price >= settings.min_sum_lead) {
+                    const udsCode = $('input[name="uds_code"]').val();
+                    const inputPrice = parseInt($('input[name="sum_order"]').val(), 10);
+                    let price = parseInt(lead.price, 10) || 0;
+                    const minSum = parseInt(settings.min_sum_lead, 10);
+
+                    if (Number.isInteger(inputPrice) && inputPrice > 0) {
+                        price = inputPrice;
+                    }
+
+                    console.log(inputPrice);
+                    console.log(price);
+
+                    if (price >= minSum) {
                         self.crm_post(
                             settings.url + '/check',
                             {
@@ -38,7 +48,7 @@ define(["jquery"], function ($) {
                                         $('.au_button__discard').css('display', 'none');
                                     }
                                 } else {
-                                    var errorMessage = res?.message || 'Неизвестная ошибка';
+                                    const errorMessage = res?.message || 'Неизвестная ошибка';
                                     if (errorMessage === 'The page you requested is not found.') {
                                         errorMessage = 'Пользователь с данным кодом на оплату не найден';
                                     }
@@ -170,12 +180,12 @@ define(["jquery"], function ($) {
                             }
                         }
 
-                        var params = {
+                        const params = {
                             hasDiscount: hasDiscount
                         };
 
-                        var callback = function (template) {
-                            var markup = template.render(params);
+                        const callback = function (template) {
+                            const markup = template.render(params);
                             self.render_template({
                                 caption: {
                                     class_name: 'js-au',

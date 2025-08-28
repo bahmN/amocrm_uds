@@ -3,6 +3,11 @@
 	{% if not hasDiscount %}
 		<div class="au_container__check">
 			<input class="au_input__numb" type="text" name="uds_code" placeholder="Код из UDS" maxlength="6" pattern="\d{6}" required>
+			<div class="au_container__check-sum">
+				<input class="au_input__numb" type="text" name="sum_order" maxlength="10" pattern="\d{10}">
+				<label>Сумма заказа (если пусто — возьмется из сделки)</label>
+			</div>
+
 			<div class="au-result"></div>
 			<button class="au_button__check">Проверить</button>
 		</div>
