@@ -17,9 +17,6 @@ define(["jquery"], function ($) {
                         price = inputPrice;
                     }
 
-                    console.log(inputPrice);
-                    console.log(price);
-
                     if (price >= minSum) {
                         self.crm_post(
                             settings.url + '/check',
@@ -48,7 +45,7 @@ define(["jquery"], function ($) {
                                         $('.au_button__discard').css('display', 'none');
                                     }
                                 } else {
-                                    const errorMessage = res?.message || 'Неизвестная ошибка';
+                                    let errorMessage = res?.message || 'Неизвестная ошибка';
                                     if (errorMessage === 'The page you requested is not found.') {
                                         errorMessage = 'Пользователь с данным кодом на оплату не найден';
                                     }
@@ -71,6 +68,7 @@ define(["jquery"], function ($) {
                 {
                     code: udsCode,
                     total: total,
+                    lead_id: AMOCRM.constant('card_id')
                 },
                 function (res) {
                     if (res.state === 'NORMAL') {
@@ -107,11 +105,12 @@ define(["jquery"], function ($) {
                 settings.url + '/reward',
                 {
                     code: udsCode,
-                    total: total
+                    total: total,
+                    lead_id: AMOCRM.constant('card_id')
                 },
                 function (res) {
                     res = JSON.parse(res);
-                    if (res["0"].accepted === 1 && res.points_rewarded) {
+                    if (res.state === 'NORMAL') {
                         $.ajax({
                             url: 'https://opt03.amocrm.ru/api/v4/leads/' + AMOCRM.constant('card_id') + '/notes',
                             method: 'post',
@@ -122,7 +121,7 @@ define(["jquery"], function ($) {
                                 },
                                 'params': {
                                     "note_type": 'common',
-                                    "text": '✅Клиенту начислены UDS баллы в размере: ' + res.points_rewarded + ' баллов.'
+                                    "text": '✅Клиенту будут начислены UDS баллы.'
                                 }
                             }),
                             success: function (res) {
@@ -169,19 +168,22 @@ define(["jquery"], function ($) {
                     '',
                     function (lead) {
                         let hasDiscount = false;
+                        let hasReward = false;
+                        // if (lead.custom_fields_values) {
+                        //     const discountField = lead.custom_fields_values.find(field =>
+                        //         field.field_name === "Скидка" || field.field_id === 509021
+                        //     );
 
-                        if (lead.custom_fields_values) {
-                            const discountField = lead.custom_fields_values.find(field =>
-                                field.field_name === "Скидка" || field.field_id === 509021
-                            );
-
-                            if (discountField?.values?.[0]?.value && parseFloat(discountField.values[0].value) > 0) {
-                                hasDiscount = true;
-                            }
-                        }
+                        //     if (discountField?.values?.[0]?.value && parseFloat(discountField.values[0].value) > 0) {
+                        //         hasDiscount = true;
+                        //     } else if (discountField?.values?.[0]?.value && parseFloat(discountField.values[0].value) <= 0) {
+                        //         hasReward = true;
+                        //     }
+                        // }
 
                         const params = {
-                            hasDiscount: hasDiscount
+                            hasDiscount: hasDiscount,
+                            hasReward: hasReward
                         };
 
                         const callback = function (template) {
